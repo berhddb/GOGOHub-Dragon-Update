@@ -1,7 +1,19 @@
+local World1, World2, World3 = false, false, false
+
+if game.PlaceId == 2753915549 then
+    World1 = true
+elseif game.PlaceId == 4442272183 then
+    World2 = true
+elseif game.PlaceId == 7449423635 then
+    World3 = true
+else
+    game:GetService("Players").LocalPlayer:Kick("Do not Support, Please wait...")
+end
+
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "BLOX FRUITS SCRIPT",
+    Name = "GOGO HUB | DRAGON UPDATE",
     LoadingTitle = "GOGO Hub",
     LoadingSubtitle = "by berhddb",
     ConfigurationSaving = {
@@ -21,20 +33,31 @@ local Window = Rayfield:CreateWindow({
     }
 })
 
--- Abas principais
+-- Abas especificadas
 local GeneralTab = Window:CreateTab("General", nil)
-local AutomaticTab = Window:CreateTab("Automatic", nil)
-local FruitTab = Window:CreateTab("Fruit", nil)
 local EspTab = Window:CreateTab("Esp", nil)
-local DragonTab = Window:CreateTab("Dragon", nil)
+local FruitsTab = Window:CreateTab("Fruits", nil)
+local MirageTab = Window:CreateTab("Mirage", nil)
 local PvpTab = Window:CreateTab("PVP", nil)
-local KitsuneTab = Window:CreateTab("Kitsune", nil)
+local DragonTab = Window:CreateTab("Dragon", nil)
 local TeleportTab = Window:CreateTab("Teleport", nil)
-local MiscTab = Window:CreateTab("Misc", nil)
+
+-- Função de Auto Farm (Placeholder)
+GeneralTab:CreateToggle({
+    Name = "Auto Farm",
+    CurrentValue = false,
+    Flag = "autoFarm",
+    Callback = function(Value)
+        if Value then
+            -- Adicionar lógica de auto farm
+        end
+    end
+})
 
 -- Variável para controlar o estado do ESP
 local espEnabled = {
     players = false,
+    fruits = false,
     advancedNPC = false
 }
 
@@ -68,13 +91,27 @@ end
 
 -- Função para atualizar o ESP de jogadores
 local function updatePlayerESP()
-    for _, player in pairs(game.Workspace.Characters:GetChildren()) do
-        if player:FindFirstChild("HumanoidRootPart") and player ~= game.Players.LocalPlayer.Character then
-            local distance = math.floor((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - player.HumanoidRootPart.Position).Magnitude)
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player ~= game.Players.LocalPlayer then
+            local distance = math.floor((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude)
             if espEnabled.players then
-                createESP(player.HumanoidRootPart, Color3.fromRGB(0, 255, 0), player.Name .. " [" .. distance .. "m]")
+                createESP(player.Character.HumanoidRootPart, Color3.fromRGB(0, 255, 0), player.Name .. " [" .. distance .. "m]")
             else
-                removeESP(player.HumanoidRootPart)
+                removeESP(player.Character.HumanoidRootPart)
+            end
+        end
+    end
+end
+
+-- Função para atualizar o ESP de frutas
+local function updateFruitESP()
+    for _, fruit in pairs(game.Workspace:GetChildren()) do
+        if fruit:IsA("Tool") and fruit:FindFirstChild("Handle") then
+            local distance = math.floor((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - fruit.Handle.Position).Magnitude)
+            if espEnabled.fruits then
+                createESP(fruit.Handle, Color3.fromRGB(255, 165, 0), fruit.Name .. " [" .. distance .. "m]")
+            else
+                removeESP(fruit.Handle)
             end
         end
     end
@@ -100,24 +137,62 @@ EspTab:CreateToggle({
     Flag = "espPlayers",
     Callback = function(Value)
         espEnabled.players = Value
+        if not Value then
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    removeESP(player.Character.HumanoidRootPart)
+                end
+            end
+        end
         updatePlayerESP()
     end
 })
 
 EspTab:CreateToggle({
+    Name = "ESP Fruits",
+    CurrentValue = false,
+    Flag = "espFruits",
+    Callback = function(Value)
+        espEnabled.fruits = Value
+        if not Value then
+            for _, fruit in pairs(game.Workspace:GetChildren()) do
+                if fruit:IsA("Tool") and fruit:FindFirstChild("Handle") then
+                    removeESP(fruit.Handle)
+                end
+            end
+        end
+        updateFruitESP()
+    end
+})
+
+-- Toggle do ESP na aba Mirage
+MirageTab:CreateToggle({
     Name = "ESP Advanced NPC Dealer",
     CurrentValue = false,
     Flag = "espAdvancedNPC",
     Callback = function(Value)
         espEnabled.advancedNPC = Value
+        if not Value then
+            local npc = game.Workspace.NPCs:FindFirstChild("Advanced Fruit Dealer")
+            if npc then
+                removeESP(npc:FindFirstChild("HumanoidRootPart"))
+            end
+        end
         updateAdvancedNPCESP()
     end
 })
 
 -- Conexão com o RunService para verificar constantemente o estado do ESP
 game:GetService("RunService").Heartbeat:Connect(function()
-    updatePlayerESP()
-    updateAdvancedNPCESP()
+    if espEnabled.players then
+        updatePlayerESP()
+    end
+    if espEnabled.fruits then
+        updateFruitESP()
+    end
+    if espEnabled.advancedNPC then
+        updateAdvancedNPCESP()
+    end
 end)
 
 -- Função para encontrar o jogador mais próximo
@@ -218,6 +293,61 @@ DragonTab:CreateButton({
         end
     end
 })
+
+-- Função para coletar frutas
+local collectFruitsEnabled = false
+
+local function collectFruits()
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+
+    while collectFruitsEnabled do
+        local foundFruit = false
+        for _, fruit in pairs(game.Workspace:GetChildren()) do
+            if fruit:IsA("Tool") and fruit:FindFirstChild("Handle") then
+                foundFruit = true
+                -- Move player to the fruit with dynamic tween speed based on distance
+                local distance = (humanoidRootPart.Position - fruit.Handle.Position).Magnitude
+                local tweenSpeed = 7 + (distance / 2000) * 2
+                local goal = {}
+                goal.CFrame = CFrame.new(fruit.Handle.Position)
+                local tween = game:GetService("TweenService"):Create(humanoidRootPart, TweenInfo.new(tweenSpeed), goal)
+                tween:Play()
+                tween.Completed:Wait()
+                if not collectFruitsEnabled then break end
+            end
+        end
+        if not foundFruit then
+            wait(1) -- Espera um segundo antes de verificar novamente
+        end
+    end
+end
+
+-- Toggle para coletar frutas na aba Fruits
+FruitsTab:CreateToggle({
+    Name = "Collect Fruit",
+    CurrentValue = false,
+    Flag = "collectFruits",
+    Callback = function(Value)
+        collectFruitsEnabled = Value
+        if collectFruitsEnabled then
+            collectFruits()
+        end
+    end
+})
+
+-- Notificar jogador quando uma nova fruta aparecer
+game.Workspace.ChildAdded:Connect(function(child)
+    if child:IsA("Tool") and child:FindFirstChild("Handle") then
+        Rayfield:Notify({
+            Title = "Fruta Spawned!",
+            Content = child.Name .. " foi gerada!",
+            Duration = 5
+        })
+        collectFruits()
+    end
+end)
 
 -- Finalização do script
 Rayfield:Notify({
