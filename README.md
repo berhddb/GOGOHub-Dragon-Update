@@ -42,12 +42,16 @@ local PvpTab = Window:CreateTab("PVP", nil)
 local DragonTab = Window:CreateTab("Dragon", nil)
 local TeleportTab = Window:CreateTab("Teleport", nil)
 
+-- Variável para controlar o estado do Auto Farm
+local autoFarmEnabled = false
+
 -- Função de Auto Farm (Placeholder)
 GeneralTab:CreateToggle({
     Name = "Auto Farm",
     CurrentValue = false,
     Flag = "autoFarm",
     Callback = function(Value)
+        autoFarmEnabled = Value
         if Value then
             -- Adicionar lógica de auto farm
         end
@@ -245,7 +249,8 @@ PvpTab:CreateToggle({
     Name = "Aimbot",
     CurrentValue = false,
     Flag = "aimbot",
-    Callback = function(Value)
+    Callback = function
+    (Value)
         aimbotEnabled = Value
         if not aimbotEnabled then
             aimbotActive = false  -- Desativa o aimbot se o toggle for desligado
@@ -309,7 +314,7 @@ local function collectFruits()
                 foundFruit = true
                 -- Move player to the fruit with dynamic tween speed based on distance
                 local distance = (humanoidRootPart.Position - fruit.Handle.Position).Magnitude
-                local tweenSpeed = 7 + (distance / 2000) * 2
+                local tweenSpeed = 2 + (distance / 1000) * 2
                 local goal = {}
                 goal.CFrame = CFrame.new(fruit.Handle.Position)
                 local tween = game:GetService("TweenService"):Create(humanoidRootPart, TweenInfo.new(tweenSpeed), goal)
@@ -345,9 +350,46 @@ game.Workspace.ChildAdded:Connect(function(child)
             Content = child.Name .. " foi gerada!",
             Duration = 5
         })
+
+        -- Pausar Auto Farm se estiver ativado
+        local wasAutoFarmEnabled = autoFarmEnabled
+        if autoFarmEnabled then
+            autoFarmEnabled = false
+            Rayfield:Notify({
+                Title = "Auto Farm Pausado",
+                Content = "Auto Farm foi pausado para coletar a fruta!",
+                Duration = 5
+            })
+        end
+
         collectFruits()
+
+        -- Verificar se todas as frutas foram coletadas antes de reativar o Auto Farm
+        local function allFruitsCollected()
+            for _, fruit in pairs(game.Workspace:GetChildren()) do
+                if fruit:IsA("Tool") and fruit:FindFirstChild("Handle") then
+                    return false
+                end
+            end
+            return true
+        end
+
+        while not allFruitsCollected() do
+            wait(1)
+        end
+
+        -- Reativar Auto Farm se estava ativado
+        if wasAutoFarmEnabled then
+            autoFarmEnabled = true
+            Rayfield:Notify({
+                Title = "Auto Farm Reativado",
+                Content = "Auto Farm foi reativado após coletar todas as frutas!",
+                Duration = 5
+            })
+        end
     end
 end)
+
 
 -- Finalização do script
 Rayfield:Notify({
