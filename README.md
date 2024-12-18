@@ -512,7 +512,7 @@ local function collectFruits()
                 foundFruit = true
                 -- Move player to the fruit with dynamic tween speed based on distance
                 local distance = (humanoidRootPart.Position - fruit.Handle.Position).Magnitude
-                local tweenSpeed = 2 + (distance / 1000) * 2
+                local tweenSpeed = 2 + (distance / 500) * 2
                 local goal = {}
                 goal.CFrame = CFrame.new(fruit.Handle.Position)
                 local tween = game:GetService("TweenService"):Create(humanoidRootPart, TweenInfo.new(tweenSpeed), goal)
@@ -1148,6 +1148,7 @@ TeleportTab:CreateButton({
         toTarget(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
     end
 })
+
 
 -- Finalização do script
 Rayfield:Notify({
