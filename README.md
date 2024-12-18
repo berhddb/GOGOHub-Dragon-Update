@@ -25,7 +25,7 @@ local Window = Rayfield:CreateWindow({
     KeySettings = {
         Title = "GOGO Hub | Key",
         Subtitle = "Key System",
-        Note = "Não há nenhum método para obter a key",
+        Note = "The key is: berzin",
         FileName = "gogohubkey",
         SaveKey = true,
         GrabKeyFromSite = false,
@@ -34,15 +34,38 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- Abas especificadas
-local GeneralTab = Window:CreateTab("General", nil)
-local EspTab = Window:CreateTab("Esp", nil)
-local FruitsTab = Window:CreateTab("Fruits", nil)
-local MirageTab = Window:CreateTab("Mirage", nil)
-local PvpTab = Window:CreateTab("PVP", nil)
-local RaidTab = Window:CreateTab("Raid", nil)
-local DragonTab = Window:CreateTab("Dragon", nil)
+local GeneralTab = Window:CreateTab("General", 'construction')
+local EspTab = Window:CreateTab("Esp", "eye")
+local FruitsTab = Window:CreateTab("Fruits", "apple")
+local MirageTab = Window:CreateTab("Mirage", "tree-palm")
+local PvpTab = Window:CreateTab("PVP", "swords")
+local RaidTab = Window:CreateTab("Raid", "skull")
+local DragonTab = Window:CreateTab("Dragon", "egg")
 local TeleportTab = Window:CreateTab("Teleport", 4483362458)
-local MiscTab = Window:CreateTab("Misc", nil)
+local MiscTab = Window:CreateTab("Misc", "user-cog")
+------------- General
+
+
+-- Adicionando o toggle para Auto Farm
+local ToggleAutoFarm = GeneralTab:CreateToggle({
+    Name = "Auto Farm",
+    CurrentValue = false,
+    Flag = "ToggleAutoFarm",
+    Callback = function(Value)
+        _G.AutoFarm = Value
+    end,
+})
+
+-- Loop para executar o auto farm com base no valor do toggle
+spawn(function()
+    while wait(0.1) do
+        if _G.AutoFarm then
+            
+        end
+    end
+end)
+
+
 
 ---------Tween
 
@@ -239,22 +262,6 @@ function toTargetP(CFgo)
 
 	return tweenfunc
 end
-
--- Variável para controlar o estado do Auto Farm
-local autoFarmEnabled = false
-
--- Função de Auto Farm (Placeholder)
-GeneralTab:CreateToggle({
-    Name = "Auto Farm",
-    CurrentValue = false,
-    Flag = "autoFarm",
-    Callback = function(Value)
-        autoFarmEnabled = Value
-        if Value then
-            -- Adicionar lógica de auto farm
-        end
-    end
-})
 
 -- Variável para controlar o estado do ESP
 local espEnabled = {
@@ -497,49 +504,6 @@ DragonTab:CreateButton({
     end
 })
 
--- Função para coletar frutas
-local collectFruitsEnabled = false
-
-local function collectFruits()
-    local player = game.Players.LocalPlayer
-    local character = player.Character
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-
-    while collectFruitsEnabled do
-        local foundFruit = false
-        for _, fruit in pairs(game.Workspace:GetChildren()) do
-            if fruit:IsA("Tool") and fruit:FindFirstChild("Handle") then
-                foundFruit = true
-                -- Move player to the fruit with dynamic tween speed based on distance
-                local distance = (humanoidRootPart.Position - fruit.Handle.Position).Magnitude
-                local tweenSpeed = 2 + (distance / 500) * 2
-                local goal = {}
-                goal.CFrame = CFrame.new(fruit.Handle.Position)
-                local tween = game:GetService("TweenService"):Create(humanoidRootPart, TweenInfo.new(tweenSpeed), goal)
-                tween:Play()
-                tween.Completed:Wait()
-                if not collectFruitsEnabled then break end
-            end
-        end
-        if not foundFruit then
-            wait(1) -- Espera um segundo antes de verificar novamente
-        end
-    end
-end
-
--- Toggle para coletar frutas na aba Fruits
-FruitsTab:CreateToggle({
-    Name = "Collect Fruit",
-    CurrentValue = false,
-    Flag = "collectFruits",
-    Callback = function(Value)
-        collectFruitsEnabled = Value
-        if collectFruitsEnabled then
-            collectFruits()
-        end
-    end
-})
-
 -- Notificar jogador quando uma nova fruta aparecer
 game.Workspace.ChildAdded:Connect(function(child)
     if child:IsA("Tool") and child:FindFirstChild("Handle") then
@@ -548,43 +512,6 @@ game.Workspace.ChildAdded:Connect(function(child)
             Content = child.Name .. " foi gerada!",
             Duration = 5
         })
-
-        -- Pausar Auto Farm se estiver ativado
-        local wasAutoFarmEnabled = autoFarmEnabled
-        if autoFarmEnabled then
-            autoFarmEnabled = false
-            Rayfield:Notify({
-                Title = "Auto Farm Pausado",
-                Content = "Auto Farm foi pausado para coletar a fruta!",
-                Duration = 5
-            })
-        end
-
-        collectFruits()
-
-        -- Verificar se todas as frutas foram coletadas antes de reativar o Auto Farm
-        local function allFruitsCollected()
-            for _, fruit in pairs(game.Workspace:GetChildren()) do
-                if fruit:IsA("Tool") and fruit:FindFirstChild("Handle") then
-                    return false
-                end
-            end
-            return true
-        end
-
-        while not allFruitsCollected() do
-            wait(1)
-        end
-
-        -- Reativar Auto Farm se estava ativado
-        if wasAutoFarmEnabled then
-            autoFarmEnabled = true
-            Rayfield:Notify({
-                Title = "Auto Farm Reativado",
-                Content = "Auto Farm foi reativado após coletar todas as frutas!",
-                Duration = 5
-            })
-        end
     end
 end)
 
@@ -672,108 +599,162 @@ MiscTab:CreateButton({
     end
 })
 
--- Variável para ativar/desativar o script de reduzir a saúde dos Humanoid
-local reduceHealthEnabled = false
+local TabDivider = RaidTab:CreateSection("Select Chip")
 
--- Função para reduzir a saúde dos Humanoid
-local function reduceHumanoidHealth()
-    local player = game.Players.LocalPlayer
-    local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+local Chips = {"Flame", "Ice", "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"}
 
-    if humanoidRootPart then
-        for _, object in pairs(game.Workspace:GetDescendants()) do
-            if object:IsA("Humanoid") and not game.Players:GetPlayerFromCharacter(object.Parent) then
-                local character = object.Parent
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    local distance = (humanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
-                    if distance <= 250 then
-                        object.Health = 0
+-- Função para criar botões para cada chip
+for _, chip in ipairs(Chips) do
+    RaidTab:CreateButton({
+        Name = chip,
+        Callback = function()
+            SelectChip = chip
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Chip Selection",
+                Text = "Selected Chip: " .. chip,
+                Duration = 5
+            })
+        end,
+    })
+end
+
+-- Toggle para comprar o chip
+local ToggleBuy = RaidTab:CreateToggle({
+    Name = "Auto Buy Chip",
+    CurrentValue = false,
+    Flag = "ToggleBuy",
+    Callback = function(Value)
+        if SelectChip then
+            _G.Auto_Buy_Chips_Dungeon = Value
+        else
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Warning",
+                Text = "No chip selected!",
+                Duration = 5
+            })
+        end
+    end,
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Buy_Chips_Dungeon and SelectChip then
+            pcall(function()
+                local args = {
+                    [1] = "RaidsNpc",
+                    [2] = "Select",
+                    [3] = SelectChip
+                }
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+            end)
+        end
+    end
+end)
+
+local TabDivider = RaidTab:CreateDivider()
+local TabSection = RaidTab:CreateSection("Raid")
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Buy_Chips_Dungeon then
+            pcall(function()
+                local args = {
+                    [1] = "RaidsNpc",
+                    [2] = "Select",
+                    [3] = SelectChip
+                }
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+            end)
+        end
+    end
+end)
+
+-- Toggle para iniciar o raid
+local ToggleStart = RaidTab:CreateToggle({
+    Name = "Start Raid",
+    CurrentValue = false,
+    Flag = "ToggleStart",
+    Callback = function(Value)
+        _G.Auto_StartRaid = Value
+    end,
+})
+
+spawn(function()
+    while wait(0.1) do
+        pcall(function()
+            if _G.Auto_StartRaid then
+                if game:GetService("Players").LocalPlayer.PlayerGui.Main.Timer.Visible == false then
+                    if not game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 1") and (game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Special Microchip") or game:GetService("Players").LocalPlayer.Character:FindFirstChild("Special Microchip")) then
+                        if World1 then
+                            fireclickdetector(game:GetService("Workspace").Map.CircleIsland.RaidSummon2.Button.Main.ClickDetector)
+                        elseif World3 then
+                            fireclickdetector(game:GetService("Workspace").Map["Boat Castle"].RaidSummon2.Button.Main.ClickDetector)
+                        end
                     end
                 end
             end
-        end
+        end)
     end
-end
+end)
 
--- Função para verificar continuamente
-local function checkReduceHealth()
-    while reduceHealthEnabled do
-        if game.Players.LocalPlayer.PlayerGui.Main.TopHUDList.RaidTimer.Visible then
-            pcall(reduceHumanoidHealth)
-        end
-        wait(2) -- Verificar a cada 0.5 segundos
-    end
-end
-
--- Adicionando o toggle para reduzir a saúde dos Humanoid na aba de Raid
-RaidTab:CreateToggle({
-    Name = "Auto Raid",
+-- Toggle para Kill Aura
+local ToggleKillAura = RaidTab:CreateToggle({
+    Name = "Kill Aura",
     CurrentValue = false,
-    Flag = "autoRaid",
+    Flag = "ToggleKillAura",
     Callback = function(Value)
-        reduceHealthEnabled = Value
-        if reduceHealthEnabled then
-            checkReduceHealth()
-        end
-    end    
+        KillAura = Value
+    end,
 })
 
--- Variável para ativar/desativar o Auto Next Island
-local autoNextIslandEnabled = false
-local tween
-
--- Função para encontrar a ilha de número mais alto e mover o jogador para o centro dela
-local function moveToNextIsland()
-    local player = game.Players.LocalPlayer
-    local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
-
-    if humanoidRootPart then
-        local highestIsland = nil
-        local highestNumber = 0
-
-        -- Verificar todas as ilhas e encontrar a de número mais alto
-        for i = 1, 5 do
-            local island = game.Workspace.Map.RaidMap:FindFirstChild("RaidIsland" .. i)
-            if island and i > highestNumber then
-                highestIsland = island
-                highestNumber = i
-            end
-        end
-
-        -- Mover o jogador para o centro da ilha de número mais alto
-        if highestIsland then
-            local islandCenter = highestIsland.PrimaryPart.Position + Vector3.new(0, 100, 0) -- Ajustar a altura conforme necessário
-            local goal = {CFrame = CFrame.new(islandCenter)}
-            tween = game:GetService("TweenService"):Create(humanoidRootPart, TweenInfo.new(2), goal)
-            tween:Play()
+spawn(function()
+    while wait() do
+        if KillAura then
+            pcall(function()
+                for i, v in pairs(game.Workspace.Enemies:GetDescendants()) do
+                    if v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        repeat task.wait()
+                            sethiddenproperty(game:GetService('Players').LocalPlayer, "SimulationRadius", math.huge)
+                            v.Humanoid.Health = 0
+                            v.HumanoidRootPart.CanCollide = false
+                        until not KillAura or not v.Parent or v.Humanoid.Health <= 0
+                    end
+                end
+            end)
         end
     end
-end
+end)
 
--- Função para verificar continuamente
-local function checkAutoNextIsland()
-    while autoNextIslandEnabled do
-        if game.Players.LocalPlayer.PlayerGui.Main.TopHUDList.RaidTimer.Visible then
-            pcall(moveToNextIsland)
-        end
-        wait(1) -- Verificar a cada 1 segundo
-    end
-end
-
--- Adicionando o toggle para Auto Next Island na aba de Raid
-RaidTab:CreateToggle({
-    Name = "Auto Next Island",
+local ToggleNextIsland = RaidTab:CreateToggle({
+    Name = "Next Island",
     CurrentValue = false,
-    Flag = "autoNextIsland",
+    Flag = "ToggleNextIsland",
     Callback = function(Value)
-        autoNextIslandEnabled = Value
-        if autoNextIslandEnabled then
-            checkAutoNextIsland()
-        elseif tween then
-            tween:Cancel() -- Cancelar o tween se o toggle for desativado
-        end
-    end    
+        AutoNextIsland = Value
+    end,
 })
+
+spawn(function()
+    while task.wait() do
+        if AutoNextIsland then
+            pcall(function()
+                if game.Players.LocalPlayer.PlayerGui.Main.TopHUDList.RaidTimer.Visible == true then
+                    if game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 5") then
+                        Tween(game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 5").CFrame * CFrame.new(0, 70, 100))
+                    elseif game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 4") then
+                        Tween(game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 4").CFrame * CFrame.new(0, 70, 100))
+                    elseif game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 3") then
+                        Tween(game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 3").CFrame * CFrame.new(0, 70, 100))
+                    elseif game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 2") then
+                        Tween(game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 2").CFrame * CFrame.new(0, 70, 100))
+                    elseif game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 1") then
+                        Tween(game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island 1").CFrame * CFrame.new(0, 70, 100))
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 -- Variável para ativar/desativar a caminhada sobre a água
 local walkOnWaterEnabled = false
