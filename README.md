@@ -2275,7 +2275,7 @@ function TweenTempleLegit()
 		)
 	end
 
-	spawn(function()
+spawn(function()
     if TweentoBlueGear then
 		BlueGear = getBlueGear()
 		if BlueGear then
