@@ -3539,6 +3539,80 @@ MiscTab:CreateButton({
 	end
 })
 
+local TabDivider = MiscTab:CreateSection("Boat Speed")
+
+-- Cria o slider para ajustar a velocidade do barco
+local BoatSpeedSlider = MiscTab:CreateSlider({
+    Name = "Boat Speed",
+    Range = {0, 500},
+    Increment = 5,
+    Suffix = "Speed",
+    CurrentValue = 100,
+    Flag = "BoatSpeed",
+    Callback = function(Value)
+        _G.BoatSpeed = Value
+    end,
+})
+
+-- Define o valor inicial do slider
+BoatSpeedSlider:Set(100)
+
+-- Cria o toggle para modificar a velocidade do barco
+local ToggleBoatSpeed = MiscTab:CreateToggle({
+    Name = "Modify Boat Speed",
+    CurrentValue = false,
+    Flag = "ModifyBoatSpeed",
+    Callback = function(Value)
+        _G.ModifyBoatSpeed = Value
+        if Value then
+            -- Função para detectar se o jogador está sentado no barco
+            local function detectBoatSeat()
+                local player = game.Players.LocalPlayer
+                local character = player.Character
+                if character then
+                    local humanoid = character:FindFirstChildOfClass("Humanoid")
+                    if humanoid and humanoid.Sit then
+                        local seat = humanoid.SeatPart
+                        if seat and seat:IsDescendantOf(game.Workspace.Boats) then
+                            local boat = seat.Parent
+                            if boat and boat:FindFirstChild("VehicleSeat") then
+                                _G.OriginalMaxSpeed = boat.VehicleSeat.MaxSpeed
+                                boat.VehicleSeat.MaxSpeed = _G.BoatSpeed
+                                print("Velocidade do barco ajustada para:", _G.BoatSpeed)
+                            end
+                        end
+                    else
+                        task.wait(1) -- Espera 1 segundo antes de verificar novamente
+                        detectBoatSeat() -- Verifica novamente
+                    end
+                else
+                    task.wait(1) -- Espera 1 segundo antes de verificar novamente
+                    detectBoatSeat() -- Verifica novamente
+                end
+            end
+
+            detectBoatSeat() -- Inicia a detecção
+        else
+            -- Restaura a velocidade original do barco
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid and humanoid.Sit then
+                    local seat = humanoid.SeatPart
+                    if seat and seat:IsDescendantOf(game.Workspace.Boats) then
+                        local boat = seat.Parent
+                        if boat and boat:FindFirstChild("VehicleSeat") then
+                            boat.VehicleSeat.MaxSpeed = _G.OriginalMaxSpeed
+                            print("Velocidade do barco restaurada para:", _G.OriginalMaxSpeed)
+                        end
+                    end
+                end
+            end
+        end
+    end,
+})
+
 -- Final
 
 -- Notificar jogador quando uma nova fruta aparecer
