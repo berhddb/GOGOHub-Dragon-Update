@@ -1695,7 +1695,7 @@ end)
 
 -- Toggle para auto farm
 local ToggleLevel = GeneralTab:CreateToggle({
-    Name = "Auto Farm",
+    Name = "Auto Farm (Broken)",
     CurrentValue = false,
     Flag = "AutoLevel",
     Callback = function(Value)
@@ -1736,7 +1736,7 @@ end)
 
 -- Toggle para ativar/desativar o Mob Aura
 GeneralTab:CreateToggle({
-    Name = "Mob Aura",
+    Name = "Mob Aura (In development)",
     CurrentValue = false,
     Flag = "ToggleMobAura",
     Callback = function(Value)
@@ -2983,11 +2983,12 @@ local ToggleSkillF = DragonTab:CreateToggle({
 
 -- Cria o toggle para Auto Pre-historic Island
 local ToggleAutoPrehistoric = DragonTab:CreateToggle({
-    Name = "Auto Pre-historic Island",
+    Name = "Auto Pre-historic Island (In development)",
     CurrentValue = false,
     Flag = "AutoPrehistoricIsland",
     Callback = function(Value)
-        _G.AutoPrehistoricIsland = Value
+        -- _G.AutoPrehistoricIsland = Value
+
     end,
 })
 
@@ -3617,10 +3618,10 @@ local ToggleBoatSpeed = MiscTab:CreateToggle({
 
 -- Notificar jogador quando uma nova fruta aparecer
 game.Workspace.ChildAdded:Connect(function(child)
-    if child:IsA("Tool") and child:FindFirstChild("Handle") then
+    if string.find(v.Name, "Fruit") and v:FindFirstChild("Handle") then
         Rayfield:Notify({
-            Title = "Uma fruta está no mapa!",
-            Content = child.Name .. " foi gerada ou dropada!",
+            Title = "Fruta encontrada",
+            Content = child.Name .. " encontrada.",
             Duration = 5,
             Image = "apple",
         })
