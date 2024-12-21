@@ -3901,7 +3901,7 @@ local ToggleBoatSpeed = MiscTab:CreateToggle({
 
 -- Notificar jogador quando uma nova fruta aparecer
 game.Workspace.ChildAdded:Connect(function(child)
-    if string.find(v.Name, "Fruit") and v:FindFirstChild("Handle") then
+    if string.find(child.Name, "Fruit") and v:FindFirstChild("Handle") then
         Rayfield:Notify({
             Title = "Fruta encontrada",
             Content = child.Name .. " encontrada.",
