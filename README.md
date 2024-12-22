@@ -15,7 +15,7 @@ local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/berh
 local Window = Rayfield:CreateWindow({
     Name = "GOGO HUB | DRAGON UPDATE",
     LoadingTitle = "GOGO Hub",
-    LoadingSubtitle = "by berhddb",
+    LoadingSubtitle = "V3.31",
     ConfigurationSaving = {
         Enabled = true,
         FolderName = nil,
@@ -1653,7 +1653,7 @@ end
 -- Dropdown para selecionar arma
 local DropdownSelectWeapon = GeneralTab:CreateDropdown({
     Name = "Weapon",
-    Options = {'Melee', 'Sword', 'Blox Fruit'},
+    Options = {'Melee', 'Sword'},
     CurrentOption = 'Melee',
     Multi = false,
     Callback = function(Value)
@@ -1663,7 +1663,7 @@ local DropdownSelectWeapon = GeneralTab:CreateDropdown({
 
 DropdownSelectWeapon:Set('Melee')
 
-task.spawn(function()
+spawn(function()
     while wait() do
         pcall(function()
             if ChooseWeapon == "Melee" then
@@ -1671,6 +1671,7 @@ task.spawn(function()
                     if v.ToolTip == "Melee" then
                         if game.Players.LocalPlayer.Backpack:FindFirstChild(tostring(v.Name)) then
                             SelectWeapon = v.Name
+                            DropdownSelectWeapon:Set('Melee')
                         end
                     end
                 end
@@ -1679,18 +1680,11 @@ task.spawn(function()
                     if v.ToolTip == "Sword" then
                         if game.Players.LocalPlayer.Backpack:FindFirstChild(tostring(v.Name)) then
                             SelectWeapon = v.Name
+                            DropdownSelectWeapon:Set('Sword')
                         end
                     end
                 end
-            elseif ChooseWeapon == "Blox Fruit" then
-                for i, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                    if v.ToolTip == "Blox Fruit" then
-                        if game.Players.LocalPlayer.Backpack:FindFirstChild(tostring(v.Name)) then
-                            SelectWeapon = v.Name
-                        end
-                    end
-                end
-            end
+end
         end)
     end
 end)
@@ -1702,52 +1696,62 @@ local ToggleLevel = GeneralTab:CreateToggle({
     Flag = "AutoLevel",
     Callback = function(Value)
         _G.AutoLevel = Value
+        if Value == false then
+            wait()
+            toTarget(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+        end
     end,
 })
+
+ToggleLevel:Set(false)
 
 spawn(function()
-    while task.wait() do
+        while task.wait() do
         if _G.AutoLevel then
-            pcall(function()
-                CheckLevel()
-                if not game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text:find(NameMon) or not game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible then
-                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-                    toTarget(CFrameQ)
-                    if (CFrameQ.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 5 then
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
-                    end
-                else
-                    for i, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                        if v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
-                            if v.Name == Ms then
-                                EquipTool(SelectWeapon)
-                                toTarget(v.HumanoidRootPart.CFrame * CFrame.new(posX, posY, posZ))
-                                repeat
-                                    wait()
-                                    AutoHaki()
-                                    AttackNoCoolDown()
-                                until not _G.AutoLevel or v.Humanoid.Health <= 0 or not v.Parent or not game:GetService("Workspace").Enemies:FindFirstChild(v.Name) or not game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible
-                            end
-                        end
-                    end
-                end
-            end)
+        pcall(function()
+          CheckLevel()
+          if not string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, NameMon) or game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false then
+          game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
+          toTarget(CFrameQ)
+          if (CFrameQ.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 5 then
+          game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest",NameQuest,QuestLv)
+          end
+          elseif string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, NameMon) or game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
+          for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+          if v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+          if v.Name == Ms then
+          repeat wait(_G.Fast_Delay)
+          AttackNoCoolDown()
+          bringmob = true
+          AutoHaki()
+          EquipTool(SelectWeapon)
+          toTarget(v.HumanoidRootPart.CFrame * CFrame.new(posX,posY,posZ))
+          v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+          v.HumanoidRootPart.Transparency = 1
+          v.Humanoid.JumpPower = 0
+          v.Humanoid.WalkSpeed = 0
+          v.HumanoidRootPart.CanCollide = false
+          FarmPos = v.HumanoidRootPart.CFrame
+          MonFarm = v.Name
+          --Click
+          until not _G.AutoLevel or not v.Parent or v.Humanoid.Health <= 0 or not game:GetService("Workspace").Enemies:FindFirstChild(v.Name) or game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible == false
+          bringmob = false
+        end   
+          end
+          end
+          for i,v in pairs(game:GetService("Workspace")["_WorldOrigin"].EnemySpawns:GetChildren()) do
+          if string.find(v.Name,NameMon) then
+          if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v.Position).Magnitude >= 10 then
+            toTarget(v.CFrame * CFrame.new(posX,posY,posZ))
+          end
+          end
+          end
+          end
+          end)
         end
-    end
-end)
-
--- Toggle para ativar/desativar o Mob Aura
-GeneralTab:CreateToggle({
-    Name = "Mob Aura (In development)",
-    CurrentValue = false,
-    Flag = "ToggleMobAura",
-    Callback = function(Value)
-        ToggleMobAura(Value)
-        if Value then
-            spawn(KillNearbyHumanoids)
         end
-    end,
-})
+        end)
 
 -- Variável para ativar/desativar o Auto Haki
 local autoHakiEnabled = false
@@ -1761,9 +1765,99 @@ local function checkHaki()
     end
 end
 
--- General
+local BringMobToggle = GeneralTab:CreateToggle({
+    Name = "Bring Mob",
+    CurrentValue = true,
+    Flag = "ToggleBringMob",
+    Callback = function(Value)
+        _G.BringMob = Value
+    end,
+})
 
+BringMobToggle:Set(true)
 
+spawn(function()
+            while wait() do
+                pcall(function()
+                    for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if _G.BringMob and bringmob then
+                            if v.Name == MonFarm and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+                                if v.Name == "Factory Staff" then
+                                    if (v.HumanoidRootPart.Position - FarmPos.Position).Magnitude <= 300 then
+                                        v.Head.CanCollide = false
+                                        v.HumanoidRootPart.CanCollide = false
+                                        v.HumanoidRootPart.Size = Vector3.new(1, 1, 1)
+                                        v.HumanoidRootPart.CFrame = FarmPos
+                                        if v.Humanoid:FindFirstChild("Animator") then
+                                            v.Humanoid.Animator:Destroy()
+                                        end
+                                        sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                                    end
+                                elseif v.Name == MonFarm then
+                                    if (v.HumanoidRootPart.Position - FarmPos.Position).Magnitude <= 300 then
+                                        v.Head.CanCollide = false
+                                        v.HumanoidRootPart.CanCollide = false
+                                        v.HumanoidRootPart.Size = Vector3.new(1, 1, 1)
+                                        v.HumanoidRootPart.CFrame = FarmPos
+                                        if v.Humanoid:FindFirstChild("Animator") then
+                                            v.Humanoid.Animator:Destroy()
+                                        end
+                                        sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                                    end
+                                end
+                            end
+                                    end
+                                end
+                            end)
+                    end
+                end)
+           
+
+            task.spawn(function()
+                while task.wait() do
+             if _G.BringMob and bringmob then
+            pcall(function()
+                for i,v in pairs(game.Workspace.Enemies:GetChildren()) do
+                if v.Name == MonFarm and (v.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 350 then
+                if InMyNetWork(v.HumanoidRootPart) then
+                v.HumanoidRootPart.CFrame = FarmPos
+                v.Humanoid.JumpPower = 0
+                v.Humanoid.WalkSpeed = 0
+                v.HumanoidRootPart.Size = Vector3.new(60,60,60)
+                v.HumanoidRootPart.CanCollide = false
+                v.Head.CanCollide = false
+                if v.Humanoid:FindFirstChild("Animator") then
+                v.Humanoid.Animator:Destroy()
+                end
+                end
+                end
+                end
+                end)
+              end
+              end
+              end)
+            
+            task.spawn(function()
+              while true do wait()
+              if setscriptable then
+              setscriptable(game.Players.LocalPlayer,"SimulationRadius",true)
+              end
+              if sethiddenproperty then
+              sethiddenproperty(game.Players.LocalPlayer,"SimulationRadius",math.huge)
+              end
+              end
+              end)
+            
+            function InMyNetWork(object)
+            if isnetworkowner then
+            return isnetworkowner(object)
+            else
+              if (object.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 350 then
+            return true
+            end
+            return false
+            end
+            end
 -- ESP
 -- Variável para controlar o estado do ESP
 local espEnabled = {
@@ -2328,6 +2422,156 @@ end)
 
 -- PVP
 
+local Playerslist = {}
+for i, v in pairs(game:GetService("Players"):GetChildren()) do
+    table.insert(Playerslist, v.Name)
+end
+
+local SelectedPly = PvpTab:CreateDropdown({
+    Name = "Select Player",
+    Options = Playerslist,
+    CurrentOption = {"nil"},
+    MultipleOptions = false,
+    Flag = "SelectedPly", -- Identificador único para salvar configuração
+    Callback = function(Options)
+        _G.SelectPly = Options[1]
+        print("Selected player: " .. _G.SelectPly) -- Depuração
+    end
+})
+
+PvpTab:CreateButton({
+    Name = "Refresh Player",
+    Callback = function()
+        table.clear(Playerslist)
+        for i, v in pairs(game:GetService("Players"):GetChildren()) do
+            table.insert(Playerslist, v.Name)
+        end
+        SelectedPly:Set(Playerslist) -- Atualiza as opções do dropdown
+    end
+})
+
+local ToggleTeleport = PvpTab:CreateToggle({
+    Name = "Teleport To Player",
+    CurrentValue = false,
+    Flag = "ToggleTeleport",
+    Callback = function(Value)
+        _G.TeleportPly = Value
+        if not Value then
+            wait()
+            toTarget(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+        else
+            print("Teleport enabled") -- Depuração
+        end
+    end
+})
+
+spawn(function()
+    while wait() do
+        pcall(function()
+            if _G.TeleportPly then
+                if game.Players:FindFirstChild(_G.SelectPly) then
+                    print("Teleporting to: " .. _G.SelectPly) -- Depuração
+                    toTarget(game.Players[_G.SelectPly].Character.HumanoidRootPart.CFrame)
+                else
+                    print("Player not found: " .. _G.SelectPly) -- Depuração
+                end
+            end
+        end)
+    end
+end)
+
+
+local TabDivider = PvpTab:CreateSection("Combat")
+
+-- Cria uma lista com os jogadores
+local Playerslist = {}
+for i, v in pairs(game:GetService("Players"):GetChildren()) do
+    table.insert(Playerslist, v.Name)
+end
+
+-- Cria um dropdown para selecionar o jogador
+local SelectedPly = PvpTab:CreateDropdown({
+    Name = "Select Player",
+    Options = Playerslist,
+    CurrentOption = {"nil"},
+    MultipleOptions = false,
+    Flag = "SelectedPly", -- Identificador único para salvar configuração
+    Callback = function(Options)
+        _G.SelectPly = Options[1]
+        print("Selected player: " .. _G.SelectPly) -- Depuração
+    end
+})
+
+PvpTab:CreateButton({
+    Name = "Refresh Player",
+    Callback = function()
+        table.clear(Playerslist)
+        for i, v in pairs(game:GetService("Players"):GetChildren()) do
+            table.insert(Playerslist, v.Name)
+        end
+        SelectedPly:Set(Playerslist) -- Atualiza as opções do dropdown
+    end
+})
+
+-- Variáveis para controlar o estado do aimbot
+local aimbotEnabled = false
+local aimbotActive = false
+
+-- Função para ativar o Aimbot
+local function aimbot()
+    if aimbotEnabled and aimbotActive then
+        local selectedPlayer = game.Players:FindFirstChild(_G.SelectPly)
+
+        if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            -- Faz o mouse seguir o jogador selecionado
+            local player = game.Players.LocalPlayer
+            local camera = game.Workspace.CurrentCamera
+            local playerPos = player.Character.HumanoidRootPart.Position
+            local selectedPos = selectedPlayer.Character.HumanoidRootPart.Position
+
+            -- Calcula a direção entre o jogador e o alvo selecionado
+            local direction = (selectedPos - playerPos).unit
+            local lookAtPos = playerPos + direction * 1000
+
+            -- Faz a câmera olhar para o alvo selecionado
+            camera.CFrame = CFrame.new(camera.CFrame.Position, lookAtPos)
+        end
+    end
+end
+
+-- Toggle do Aimbot na aba PVP
+PvpTab:CreateToggle({
+    Name = "Aimbot",
+    CurrentValue = false,
+    Flag = "aimbot",
+    Callback = function(Value)
+        aimbotEnabled = Value
+        if not aimbotEnabled then
+            aimbotActive = false  -- Desativa o aimbot se o toggle for desligado
+        end
+    end
+})
+
+-- Função de controle para a tecla G
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+
+    if input.KeyCode == Enum.KeyCode.G and aimbotEnabled then
+        aimbotActive = not aimbotActive
+        Rayfield:Notify({
+            Title = aimbotActive and "Aimbot Ativado" or "Aimbot Desativado",
+            Content = aimbotActive and "O Aimbot está agora ativado!" or "O Aimbot foi desativado!",
+            Duration = 3,
+            Image = aimbotActive and "power" or "power-off",
+        })
+    end
+end)
+
+-- Conexão com o RunService para verificar constantemente o estado do aimbot
+game:GetService("RunService").Heartbeat:Connect(function()
+    aimbot() -- Chama a função de aimbot
+end)
 
 
 -- Raids
@@ -2835,12 +3079,6 @@ ShopTab:CreateButton({
     Name = "Black Leg",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyBlackLeg")
-        Rayfield:Notify({
-            Title = "Estilo de luta comprado!",
-            Content = "Caso você ja tinha ele foi equipado.",
-            Duration = 2,
-            Image = "check",
-        })
     end
 })
 
@@ -2848,12 +3086,6 @@ ShopTab:CreateButton({
     Name = "Electro",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyElectro")
-        Rayfield:Notify({
-            Title = "Estilo de luta comprado!",
-            Content = "Caso você ja tinha ele foi equipado.",
-            Duration = 2,
-            Image = "check",
-        })
     end
 })
 
@@ -2861,12 +3093,6 @@ ShopTab:CreateButton({
     Name = "Fishman Karate",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyFishmanKarate")
-        Rayfield:Notify({
-            Title = "Estilo de luta comprado!",
-            Content = "Caso você ja tinha ele foi equipado.",
-            Duration = 2,
-            Image = "check",
-        })
     end
 })
 
@@ -2875,12 +3101,6 @@ ShopTab:CreateButton({
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "DragonClaw", "1")
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "DragonClaw", "2")
-        Rayfield:Notify({
-            Title = "Estilo de luta comprado!",
-            Content = "Caso você ja tinha ele foi equipado.",
-            Duration = 2,
-            Image = "check",
-        })
     end
 })
 
@@ -2888,12 +3108,6 @@ ShopTab:CreateButton({
     Name = "Superhuman",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySuperhuman")
-        Rayfield:Notify({
-            Title = "Estilo de luta comprado!",
-            Content = "Caso você ja tinha ele foi equipado.",
-            Duration = 2,
-            Image = "check",
-        })
     end
 })
 
@@ -2901,12 +3115,6 @@ ShopTab:CreateButton({
     Name = "Death Step",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyDeathStep")
-        Rayfield:Notify({
-            Title = "Estilo de luta comprado!",
-            Content = "Caso você ja tinha ele foi equipado.",
-            Duration = 2,
-            Image = "check",
-        })
     end
 })
 
@@ -2915,12 +3123,6 @@ ShopTab:CreateButton({
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySharkmanKarate", true)
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySharkmanKarate")
-        Rayfield:Notify({
-            Title = "Estilo de luta comprado!",
-            Content = "Caso você ja tinha ele foi equipado.",
-            Duration = 2,
-            Image = "check",
-        })
     end
 })
 
@@ -2928,12 +3130,6 @@ ShopTab:CreateButton({
     Name = "Electric Claw",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyElectricClaw")
-        Rayfield:Notify({
-            Title = "Estilo de luta comprado!",
-            Content = "Caso você ja tinha ele foi equipado.",
-            Duration = 2,
-            Image = "check",
-        })
     end
 })
 
@@ -2941,12 +3137,6 @@ ShopTab:CreateButton({
     Name = "Dragon Talon",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyDragonTalon")
-        Rayfield:Notify({
-            Title = "Estilo de luta comprado!",
-            Content = "Caso você ja tinha ele foi equipado.",
-            Duration = 2,
-            Image = "check",
-        })
     end
 })
 
@@ -2954,12 +3144,13 @@ ShopTab:CreateButton({
     Name = "Godhuman",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyGodhuman")
-        Rayfield:Notify({
-            Title = "Estilo de luta comprado!",
-            Content = "Caso você ja tinha ele foi equipado.",
-            Duration = 2,
-            Image = "check",
-        })
+    end
+})
+
+ShopTab:CreateButton({
+    Name = "Sanguine Art",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySanguineArt")
     end
 })
 
@@ -2981,6 +3172,19 @@ ShopTab:CreateButton({
     end
 })
 
+ShopTab:CreateButton({
+    Name = "Cyborg Race",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CyborgTrainer", "Buy")
+    end
+})
+
+ShopTab:CreateButton({
+    Name = "Ghoul Race",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Ectoplasm", "Change", 4)
+    end
+})
 -- Dragon
 
 local Section = DragonTab:CreateSection("Dragon")
