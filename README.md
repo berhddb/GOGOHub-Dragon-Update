@@ -10,7 +10,7 @@ else
     game:GetService("Players").LocalPlayer:Kick("Do not Support, Please wait...")
 end
 
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/berhddb/GOGO.Library/refs/heads/main/README.md'))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
     Name = "GOGO HUB | DRAGON UPDATE",
