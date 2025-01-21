@@ -9,16 +9,17 @@ elseif game.PlaceId == 7449423635 then
 else
     game:GetService("Players").LocalPlayer:Kick("Do not Support, Please wait...")
 end
-
+local isStudio
+local Support = false
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
     Name = "GOGO HUB | DRAGON UPDATE",
     LoadingTitle = "GOGO Hub",
-    LoadingSubtitle = "V3.31",
+    LoadingSubtitle = "V4.1",
     ConfigurationSaving = {
         Enabled = true,
-        FolderName = nil,
+        FolderName = "GOGHub",
         FileName = 'GOGO Hub'
     },
     KeySystem = true,
@@ -34,6 +35,20 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- Abas especificadas
+local InfoTab = Window:CreateTab("Info", "laptop")
+local TabSection = InfoTab:CreateSection("Info")
+-- Info
+local Label = InfoTab:CreateLabel("Bem vindo "..game.Players.LocalPlayer.Name.." ao GOGO Hub", 4483362458, Color3.fromRGB(10, 10, 10), false) -- Title, Icon, Color, IgnoreTheme
+local ExecutorParagraph = InfoTab:CreateParagraph({Title = (isStudio and "Debugging (Studio)" or identifyexecutor()) or "Your Executor Does Not Support identifyexecutor.", Content = "Text"})
+	if "Xeno" or "Solara" or "Swift" == identifyexecutor() then
+        ExecutorParagraph:Set({Title = (isStudio and "Debugging (Studio)" or identifyexecutor()) or "Your Executor Does Not Support identifyexecutor.", Content = "Este executor é suportado e todos os elementos funcionarão"})
+        Support = true
+	else
+        ExecutorParagraph:Set({Title = (isStudio and "Debugging (Studio)" or identifyexecutor()) or "Your Executor Does Not Support identifyexecutor.", Content = "Este executor não é suportado no momento"})
+        Support = false
+	end
+-- Resto das abas
+if Support == true then
 local GeneralTab = Window:CreateTab("General", "laptop")
 local EspTab = Window:CreateTab("Esp", "eye")
 local FruitsTab = Window:CreateTab("Fruits", "apple")
@@ -49,7 +64,7 @@ local MiscTab = Window:CreateTab("Misc", "user-cog")
 
 -- TabsSection
 local TabSection = GeneralTab:CreateSection("Principal")
-GeneralTab:CreateParagraph({ Title = "GOGO Hub", Content = "Versão: 2.2 | Feito por berhddb"})
+GeneralTab:CreateParagraph({ Title = "GOGO Hub", Content = "Versão: 4.1 | Feito por berhddb"})
 local TabSection = EspTab:CreateSection("ESP")
 local TabSection = FruitsTab:CreateSection("Frutas")
 local TabSection = RaceV4Tab:CreateSection("Race V4")
@@ -57,7 +72,7 @@ local TabSection = SeaTab:CreateSection("Sea")
 local TabSection = PvpTab:CreateSection("PVP")
 local TabSection = StatsTab:CreateSection("Stats/Points")
 local TabSection = MiscTab:CreateSection("Misc")
-
+end
 -- OTHER
     function TweenShip(CFgo)
         local tween_s = game:service"TweenService"
@@ -1542,11 +1557,13 @@ end
 local FastAttackOptions = {'Fast Attack', 'Normal Attack', 'Super Fast Attack'}
 
 local DropdownDelayAttack = GeneralTab:CreateDropdown({
-    Name = "Select Fast Attack",
-    Options = FastAttackOptions,
-    CurrentOption = 'Super Fast Attack',
-    Callback = function(Value)
-        _G.FastAttackFaiFao_Mode = Value
+   Name = "Select Fast Attack",
+   Options = FastAttackOptions,
+   CurrentOption = {'Super Fast Attack'},
+   MultipleOptions = false,
+   Flag = "DropdownDelayAttack", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+   _G.FastAttackFaiFao_Mode = Value
         if _G.FastAttackFaiFao_Mode == "Fast Attack" then
             _G.Fast_Delay = 0.029
         elseif _G.FastAttackFaiFao_Mode == "Normal Attack" then
@@ -1554,7 +1571,7 @@ local DropdownDelayAttack = GeneralTab:CreateDropdown({
         elseif _G.FastAttackFaiFao_Mode == "Super Fast Attack" then
             _G.Fast_Delay = 0.0005
         end
-    end,
+   end,
 })
 
 DropdownDelayAttack:Set('Super Fast Attack')
@@ -3964,6 +3981,8 @@ game.Workspace.ChildAdded:Connect(function(child)
         })
     end
 end)
+
+Rayfield:LoadConfiguration()
 
 -- Finalização do script
 Rayfield:Notify({
