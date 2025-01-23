@@ -48,7 +48,7 @@ local ExecutorParagraph = InfoTab:CreateParagraph({Title = (isStudio and "Debugg
         Support = false
 	end
 -- Resto das abas
-if Support == true then
+
 local GeneralTab = Window:CreateTab("General", "laptop")
 local EspTab = Window:CreateTab("Esp", "eye")
 local FruitsTab = Window:CreateTab("Fruits", "apple")
@@ -72,7 +72,7 @@ local TabSection = SeaTab:CreateSection("Sea")
 local TabSection = PvpTab:CreateSection("PVP")
 local TabSection = StatsTab:CreateSection("Stats/Points")
 local TabSection = MiscTab:CreateSection("Misc")
-end
+
 -- OTHER
     function TweenShip(CFgo)
         local tween_s = game:service"TweenService"
